@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="container">
+    <h1>Job Status</h1>
+    <p><strong>Job ID:</strong> {{ job.job_id }}</p>
+    <p><strong>Status:</strong> {{ job.status }}</p>
+    <p><strong>Start Time:</strong> {{ job.start_time }}</p>
+    <p><strong>End Time:</strong> {{ job.end_time }}</p>
+
+    <h2>Logs</h2>
+    <pre>{{ job.logs | join('\n') }}</pre>
+</div>
+</body>
+</html>

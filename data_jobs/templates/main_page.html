@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Data Jobs API</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        thead {
+            background-color: #007bff;
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .completed {
+            background-color: #e6ffe6;
+        }
+
+        .failed {
+            background-color: #ffe6e6;
+        }
+
+        .pending {
+            background-color: #e6f7ff;
+        }
+
+        .view-logs {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .view-logs:hover {
+            text-decoration: underline;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Running and Completed Tasks</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>Job ID</th>
+            <th>Status</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Logs</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for task in tasks %}
+        <tr class="{% if task.status == 'COMPLETED' %}completed{% elif task.status == 'FAILED' %}failed{% else %}pending{% endif %}">
+            <td>{{ task.job_id }}</td>
+            <td>{{ task.status }}</td>
+            <td>{{ task.start_time | date_format if task.start_time else 'N/A' }}</td>
+            <td>{{ task.end_time | date_format if task.end_time else 'N/A' }}</td>
+            <td>
+                <a href="{{ url_for('job_status', job_id=task.job_id) }}" class="view-logs">View Logs</a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="button-group">
+        <a href="/move-frames-form">
+            <button>Submit Move Frames Job</button>
+        </a>
+        <a href="/delete-frames-form">
+            <button>Submit Delete Frames Job</button>
+        </a>
+    </div>
+</div>
+</body>
+</html>
