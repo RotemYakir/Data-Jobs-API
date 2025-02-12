@@ -46,10 +46,6 @@
             border-bottom: 1px solid #e0e0e0;
         }
 
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
         tr:hover {
             background-color: #f1f1f1;
         }
@@ -115,7 +111,10 @@
         </thead>
         <tbody>
         {% for task in tasks %}
-        <tr class="{% if task.status == 'COMPLETED' %}completed{% elif task.status == 'FAILED' %}failed{% else %}pending{% endif %}">
+        <tr class="{% if task.status == 'COMPLETED' %}completed
+            {% elif task.status == 'FAILED' %}failed
+            {% elif task.status == 'RUNNING' %}running
+            {% else %}pending{% endif %}">
             <td>{{ task.job_id }}</td>
             <td>{{ task.status }}</td>
             <td>{{ task.start_time | date_format if task.start_time else 'N/A' }}</td>
@@ -128,11 +127,8 @@
         </tbody>
     </table>
     <div class="button-group">
-        <a href="/move-frames-form">
-            <button>New Move Frames Job</button>
-        </a>
-        <a href="/delete-frames-form">
-            <button>New Delete Frames Job</button>
+        <a href="/job-form">
+            <button>New Job</button>
         </a>
     </div>
 </div>

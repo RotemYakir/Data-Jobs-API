@@ -1,8 +1,8 @@
+import time
 from abc import ABC, abstractmethod
 import logging
 from datetime import datetime
-from dataclasses import dataclass
-from typing import Optional
+from celery import current_task
 
 
 class Job(ABC):
@@ -25,7 +25,10 @@ class Job(ABC):
         self.status = 'RUNNING'
         self.log(f"Job {self.job_id} started with params: {self.params}")
         try:
-            self.execute()
+            for i in range(5):  # Simulate 5 steps, each taking 60s
+                current_task.update_state(state="RUNNING", meta={"progress": f"{(i + 1) * 20}% done"})
+                self.log(f"Simulating work... {i + 1}/5")
+                time.sleep(60)  # Sleep for 60 seconds per step            self.execute()
             self.status = 'COMPLETED'
             self.log(f"Job {self.job_id} completed successfully.")
         except Exception as e:
@@ -36,7 +39,6 @@ class Job(ABC):
 
     @abstractmethod
     def execute(self):
-        """This method should be implemented by all subclasses to define the job logic."""
         pass
 
     def get_status(self):
@@ -49,16 +51,10 @@ class Job(ABC):
         }
 
 
-@dataclass
-class MoveFramesJobParams:
-    folder_patterns: str
-    frame_query: Optional[str]
-    source: str
-    destination: str
-    modify: bool = True
-
-
 class MoveFramesJob(Job):
+    """ Job for moving frames between locations. """
+    PARAMS = ["folder_patterns", "frame_query", "source", "destination", "modify"]
+
     def execute(self):
         folder_patterns = self.params.get('folder_patterns')
         frame_query = self.params.get('frame_query')
@@ -66,34 +62,13 @@ class MoveFramesJob(Job):
         destination = self.params.get('destination')
         modify = self.params.get('modify', True)
 
-        # def change_folder(frame, frame_index):
-        #     if source:
-        #         old_folder = frame.meta['folder']
-        #         new_folder = old_folder.replace(source, destination)
-        #     else:
-        #         new_folder = destination
-        #
-        #     frame.meta['folder'] = new_folder
-        #     return modify
-        #
-        # self.log(
-        #     f"Moving frames FROM: {source} TO: {destination}\nframe_query={frame_query} | folder_patterns={folder_patterns}")
-        # ng.frames.modify_frames_bulk(
-        #     modify_func=change_folder,
-        #     folder_patterns=folder_patterns,
-        #     frame_query=frame_query
-        # )
-
-        # logs to simulate behavior without executing modify_frames_bulk
         if not folder_patterns or not destination:
             self.log("Validation failed: 'folder_patterns' or 'destination' is missing.")
             raise ValueError("Missing required parameters.")
 
-        self.log(
-            f"Starting: Checking frames with folder_patterns='{folder_patterns}' and frame_query='{frame_query}'")
+        self.log(f"Starting: Checking frames with folder_patterns='{folder_patterns}' and frame_query='{frame_query}'")
 
-        # Simulated log output for dry run
-        frame_count = 5  # Assume we found 5 matching frames for the test
+        frame_count = 5  # Simulated count
         self.log(f"Found {frame_count} frames matching the criteria.")
 
         for i in range(frame_count):
@@ -101,33 +76,46 @@ class MoveFramesJob(Job):
             simulated_new_folder = simulated_old_folder.replace(source, destination) if source else destination
             self.log(f"Simulated frame {i + 1}: Moving from '{simulated_old_folder}' to '{simulated_new_folder}'")
 
-        self.log("completed successfully.")
-
-
-@dataclass
-class DeleteFramesJobParams:
-    folder_pattern: str
-    frame_query: Optional[str]
+        self.log("Move operation completed successfully.")
 
 
 class DeleteFramesJob(Job):
+    """ Job for deleting frames. """
+    PARAMS = ["folder_pattern", "frame_query"]
+
     def execute(self):
         folder_pattern = self.params.get('folder_pattern')
         frame_query = self.params.get('frame_query')
 
-        # Validation checks
         if not folder_pattern:
             self.log("Validation failed: 'folder_pattern' is missing.")
             raise ValueError("Missing required parameters.")
 
-        # Simulated deletion logs
         self.log(
             f"Simulating deletion for frames with folder_pattern='{folder_pattern}' and frame_query='{frame_query}'")
 
-        simulated_deletion_count = 5  # Example number of frames
+        simulated_deletion_count = 5
         self.log(f"Found {simulated_deletion_count} frames to delete.")
 
         for i in range(simulated_deletion_count):
             self.log(f"Simulated deletion of frame {i + 1}: From folder '{folder_pattern}'")
 
-        self.log("Deletion simulation completed.")
+        self.log("Deletion operation completed successfully.")
+
+
+def job_factory(job_name: str):
+    """ Factory method to return the correct job class. """
+    job_map = {
+        "delete": DeleteFramesJob,
+        "move": MoveFramesJob
+    }
+    job = job_map.get(job_name)
+    if not job:
+        raise NameError(f"Job '{job_name}' doesn't exist")
+    return job
+
+
+def get_job_parameters(job_name: str):
+    """Returns a list of parameter names required for a given job."""
+    job_class = job_factory(job_name)
+    return job_class.PARAMS  # Now accessing a properly defined class variable

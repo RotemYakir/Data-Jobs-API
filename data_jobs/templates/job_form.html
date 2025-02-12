@@ -2,132 +2,119 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Data Jobs API</title>
+    <title>Submit a Job</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f9f9f9;
-            color: #333;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
             margin: 0;
         }
 
         .container {
-            width: 100%;
-            max-width: 800px;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-            padding: 30px 40px;
-            box-sizing: border-box;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 400px;
         }
 
         h1 {
             text-align: center;
             color: #007bff;
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-        }
-
-        form {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
         }
 
         label {
             font-weight: bold;
-            color: #555;
-            grid-column: span 2;
+            display: block;
+            margin-top: 15px;
         }
 
-        input[type="text"] {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 15px;
+        select, input {
             width: 100%;
-            box-sizing: border-box;
-            grid-column: span 2;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
         }
 
         .button-group {
             display: flex;
-            justify-content: flex-end;
-            grid-column: span 2;
+            justify-content: center;
+            margin-top: 20px;
         }
 
         button {
-            padding: 12px 20px;
-            font-size: 16px;
-            color: white;
             background-color: #007bff;
+            color: white;
             border: none;
-            border-radius: 8px;
+            padding: 12px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+            width: 100%;
         }
 
         button:hover {
             background-color: #0056b3;
         }
-
-        .form-section {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
-        }
     </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const jobParams = {{ job_params | tojson }};
+            const jobSelect = document.getElementById("job_name");
+            const paramsContainer = document.getElementById("params-container");
+
+            function updateParams() {
+                paramsContainer.innerHTML = ""; // Clear previous inputs
+                const selectedJob = jobSelect.value;
+                if (!selectedJob || !jobParams[selectedJob]) return;
+
+                jobParams[selectedJob].forEach(param => {
+                    const label = document.createElement("label");
+                    label.textContent = param.replace("_", " ").toUpperCase() + ":";
+
+                    const input = document.createElement("input");
+                    input.type = "text";
+                    input.name = param;
+                    input.required = true;
+
+                    paramsContainer.appendChild(label);
+                    paramsContainer.appendChild(input);
+                });
+            }
+
+            jobSelect.addEventListener("change", updateParams);
+            updateParams(); // Call once to set the initial state
+        });
+    </script>
 </head>
 <body>
     <div class="container">
-        <h1>Trigger Move Frames Job</h1>
+        <h1>Submit a Job</h1>
         <form action="/submit-job" method="post">
+            <label for="job_name">Select Job:</label>
+            <select id="job_name" name="job_name" required>
+                <option value="">--Select a Job--</option>
+                {% for job in job_types %}
+                    <option value="{{ job }}">{{ job.replace("_", " ").title() }}</option>
+                {% endfor %}
+            </select>
+
             <label for="job_id">Job ID:</label>
             <input type="text" id="job_id" name="job_id" required>
 
-            <label for="folder_patterns">Folder Patterns:</label>
-            <input type="text" id="folder_patterns" name="folder_patterns" required>
-
-            <label for="frame_query">Frame Query:</label>
-            <input type="text" id="frame_query" name="frame_query">
-
-            <label for="source">Source:</label>
-            <input type="text" id="source" name="source">
-
-            <label for="destination">Destination:</label>
-            <input type="text" id="destination" name="destination" required>
-
-            <label for="modify">Modify (true/false):</label>
-            <input type="text" id="modify" name="modify" value="true">
+            <div id="params-container"></div> <!-- Dynamic inputs appear here -->
 
             <div class="button-group">
-                <button type="submit">Submit Move Job</button>
+                <button type="submit">Submit Job</button>
             </div>
         </form>
-
-        <div class="form-section">
-            <h1>Trigger Delete Frames Job</h1>
-            <form action="/submit-delete-job" method="post">
-                <label for="delete_job_id">Job ID:</label>
-                <input type="text" id="delete_job_id" name="job_id" required>
-
-                <label for="delete_folder_pattern">Folder Pattern:</label>
-                <input type="text" id="delete_folder_pattern" name="folder_pattern" required>
-
-                <label for="delete_frame_query">Frame Query:</label>
-                <input type="text" id="delete_frame_query" name="frame_query">
-
-                <div class="button-group">
-                    <button type="submit">Submit Delete Job</button>
-                </div>
-            </form>
-        </div>
     </div>
 </body>
 </html>
