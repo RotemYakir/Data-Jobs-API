@@ -67,11 +67,12 @@ class Job(ABC):
 
 class MoveFramesJob(Job):
     """ Job for moving frames between locations. """
-    PARAMS = ["folder_patterns", "frame_query", "source", "destination", "modify"]
+    PARAMS = ["folder_patterns", "frame_query", "label_query", "source", "destination", "modify"]
 
     def execute(self):
         folder_patterns = self.params.get('folder_patterns')
         frame_query = self.params.get('frame_query')
+        label_query = self.params.get('label_query')
         source = self.params.get('source')
         destination = self.params.get('destination')
         modify = self.params.get('modify', True)
@@ -80,7 +81,8 @@ class MoveFramesJob(Job):
             self.log("Validation failed: 'folder_patterns' or 'destination' is missing.")
             raise ValueError("Missing required parameters.")
 
-        self.log(f"Starting: Checking frames with folder_patterns='{folder_patterns}' and frame_query='{frame_query}'")
+        self.log(
+            f"Starting: Checking frames with folder_patterns='{folder_patterns}' and frame_query='{frame_query}' label_query='{label_query}'")
 
         frame_count = 5  # Simulated count
         self.log(f"Found {frame_count} frames matching the criteria.")

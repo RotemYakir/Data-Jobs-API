@@ -77,7 +77,7 @@
 
                 jobParams[selectedJob].forEach(param => {
                     const label = document.createElement("label");
-                    label.textContent = param.replace("_", " ").toUpperCase() + ":";
+                    label.textContent = param.replace("_", " ").split(" ").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ") + ":";
 
                     const input = document.createElement("input");
                     input.type = "text";
