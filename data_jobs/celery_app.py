@@ -11,16 +11,16 @@ result_db = mongo_client['celery_results']
 
 
 @celery_app.task(name='celery_tasks.run_job')
-def run_job(job_name, job_description, params):
+def run_job(job_type, job_description, params):
     try:
-        job_class = job_factory(job_name)
+        job_class = job_factory(job_type)
         job = job_class(job_description, params)
-        result_db['job_results'].insert_one(job.get_status())
+        result_db['job_results'].insert_one(job.get_job_data())
         job.run()
         result_db['job_results'].update_one(
             {"job_id": job.job_id},
-            {"$set": job.get_status()}
+            {"$set": job.get_job_data()}
         )
-        return job.get_status()
+        return job.get_job_data()
     except NameError as e:
         return {"error": str(e)}

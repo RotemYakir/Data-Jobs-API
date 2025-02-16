@@ -33,7 +33,7 @@ class Job(ABC):
         self.status = 'RUNNING'
         result_db['job_results'].update_one(
             {"job_id": self.job_id},
-            {"$set": self.get_status()}
+            {"$set": self.get_job_data()}
         )
         self.log(f"Job {self.job_id} started with params: {self.params}")
         try:
@@ -54,7 +54,7 @@ class Job(ABC):
     def execute(self):
         pass
 
-    def get_status(self):
+    def get_job_data(self):
         return {
             'job_id': self.job_id,
             'job_description': self.job_description,
@@ -117,19 +117,19 @@ class DeleteFramesJob(Job):
         self.log("Deletion operation completed successfully.")
 
 
-def job_factory(job_name: str):
+def job_factory(job_type: str):
     """ Factory method to return the correct job class. """
     job_map = {
         "delete": DeleteFramesJob,
         "move": MoveFramesJob
     }
-    job = job_map.get(job_name)
+    job = job_map.get(job_type)
     if not job:
-        raise NameError(f"Job '{job_name}' doesn't exist")
+        raise NameError(f"Job '{job_type}' doesn't exist")
     return job
 
 
-def get_job_parameters(job_name: str):
+def get_job_parameters(job_type: str):
     """Returns a list of parameter names required for a given job."""
-    job_class = job_factory(job_name)
+    job_class = job_factory(job_type)
     return job_class.PARAMS  # Now accessing a properly defined class variable

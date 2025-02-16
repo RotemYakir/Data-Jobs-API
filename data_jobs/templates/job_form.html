@@ -67,7 +67,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const jobParams = {{ job_params | tojson }};
-            const jobSelect = document.getElementById("job_name");
+            const jobSelect = document.getElementById("job_type");
             const paramsContainer = document.getElementById("params-container");
 
             function updateParams() {
@@ -98,8 +98,8 @@
     <div class="container">
         <h1>Submit a Job</h1>
         <form action="/submit-job" method="post">
-            <label for="job_name">Select Job:</label>
-            <select id="job_name" name="job_name" required>
+            <label for="job_type">Select Job:</label>
+            <select id="job_type" name="job_type" required>
                 <option value="">--Select a Job--</option>
                 {% for job in job_types %}
                     <option value="{{ job }}">{{ job.replace("_", " ").title() }}</option>

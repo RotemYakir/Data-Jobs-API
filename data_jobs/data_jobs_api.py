@@ -47,17 +47,17 @@ def submit_job():
     """
     Generic job submission handler.
     """
-    job_name = request.form.get('job_name')
+    job_type = request.form.get('job_type')
     job_description = request.form.get('job_description')
 
     # Collect all parameters dynamically
-    params = {key: value for key, value in request.form.items() if key not in ['job_name', 'job_id']}
+    params = {key: value for key, value in request.form.items() if key not in ['job_type', 'job_id']}
 
     try:
-        task_result = run_job.delay(job_name, job_description, params)
+        task_result = run_job.delay(job_type, job_description, params)
         return redirect("/")
     except NameError:
-        return f"Error: Job '{job_name}' not found.", 400
+        return f"Error: Job '{job_type}' not found.", 400
 
 
 @app.route('/job-status/<job_id>')
