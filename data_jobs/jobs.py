@@ -2,12 +2,20 @@ import time
 from abc import ABC, abstractmethod
 import logging
 from datetime import datetime
+
+import pymongo
 from celery import current_task
+from bson import ObjectId
+
+mongo_client = pymongo.MongoClient('mongodb://localhost:27017/')
+result_db = mongo_client['celery_results']
+job_results_collection = result_db['job_results']
 
 
 class Job(ABC):
-    def __init__(self, job_id: str, params: dict):
-        self.job_id = job_id
+    def __init__(self, job_description: str, params: dict):
+        self.job_id = str(ObjectId())
+        self.job_description = job_description
         self.params = params
         self.start_time = None
         self.end_time = None
@@ -23,12 +31,17 @@ class Job(ABC):
     def run(self):
         self.start_time = datetime.now()
         self.status = 'RUNNING'
+        result_db['job_results'].update_one(
+            {"job_id": self.job_id},
+            {"$set": self.get_status()}
+        )
         self.log(f"Job {self.job_id} started with params: {self.params}")
         try:
+            self.execute()
             for i in range(5):  # Simulate 5 steps, each taking 60s
                 current_task.update_state(state="RUNNING", meta={"progress": f"{(i + 1) * 20}% done"})
                 self.log(f"Simulating work... {i + 1}/5")
-                time.sleep(60)  # Sleep for 60 seconds per step            self.execute()
+                time.sleep(5)  # Sleep for 60 seconds per step
             self.status = 'COMPLETED'
             self.log(f"Job {self.job_id} completed successfully.")
         except Exception as e:
@@ -44,6 +57,7 @@ class Job(ABC):
     def get_status(self):
         return {
             'job_id': self.job_id,
+            'job_description': self.job_description,
             'status': self.status,
             'start_time': self.start_time,
             'end_time': self.end_time,

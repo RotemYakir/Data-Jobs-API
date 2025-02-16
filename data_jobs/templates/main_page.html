@@ -58,7 +58,7 @@
             background-color: #ffe6e6;
         }
 
-        .pending {
+        .running {
             background-color: #e6f7ff;
         }
 
@@ -102,7 +102,7 @@
     <table>
         <thead>
         <tr>
-            <th>Job ID</th>
+            <th>Job Description</th>
             <th>Status</th>
             <th>Start Time</th>
             <th>End Time</th>
@@ -115,7 +115,7 @@
             {% elif task.status == 'FAILED' %}failed
             {% elif task.status == 'RUNNING' %}running
             {% else %}pending{% endif %}">
-            <td>{{ task.job_id }}</td>
+            <td>{{ task.job_description }}</td>
             <td>{{ task.status }}</td>
             <td>{{ task.start_time | date_format if task.start_time else 'N/A' }}</td>
             <td>{{ task.end_time | date_format if task.end_time else 'N/A' }}</td>

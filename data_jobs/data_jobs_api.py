@@ -31,6 +31,7 @@ def main_page():
     tasks = [{**task, '_id': str(task['_id'])} for task in tasks]
     return render_template('main_page.html', tasks=tasks)
 
+
 @app.route('/job-form')
 def job_form():
     """
@@ -47,13 +48,13 @@ def submit_job():
     Generic job submission handler.
     """
     job_name = request.form.get('job_name')
-    job_id = request.form.get('job_id')
+    job_description = request.form.get('job_description')
 
     # Collect all parameters dynamically
     params = {key: value for key, value in request.form.items() if key not in ['job_name', 'job_id']}
 
     try:
-        task_result = run_job.delay(job_name, job_id, params)
+        task_result = run_job.delay(job_name, job_description, params)
         return redirect("/")
     except NameError:
         return f"Error: Job '{job_name}' not found.", 400
@@ -64,10 +65,8 @@ def job_status(job_id):
     result = result_db['job_results'].find_one({'job_id': job_id})
     if not result:
         return "Job not found.", 404
-
     result['_id'] = str(result['_id'])
     return jsonify(result)
-
 
 
 if __name__ == '__main__':
