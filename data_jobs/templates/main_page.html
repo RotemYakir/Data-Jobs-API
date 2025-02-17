@@ -95,6 +95,13 @@
         }
 
     </style>
+    <script>
+        function confirmStop(jobId) {
+            if (confirm("Are you sure you want to stop this job?")) {
+                document.getElementById("stop-form-" + jobId).submit();
+            }
+        }
+    </script>
 </head>
 <body>
 <div class="container">
@@ -110,21 +117,29 @@
         </tr>
         </thead>
         <tbody>
-        {% for task in tasks %}
-        <tr class="{% if task.status == 'COMPLETED' %}completed
-            {% elif task.status == 'FAILED' %}failed
-            {% elif task.status == 'RUNNING' %}running
-            {% else %}pending{% endif %}">
-            <td>{{ task.job_description }}</td>
-            <td>{{ task.status }}</td>
-            <td>{{ task.start_time | date_format if task.start_time else 'N/A' }}</td>
-            <td>{{ task.end_time | date_format if task.end_time else 'N/A' }}</td>
-            <td>
-                <a href="{{ url_for('job_status', job_id=task.job_id) }}" class="view-logs">View Logs</a>
-            </td>
-        </tr>
-        {% endfor %}
-        </tbody>
+            {% for task in tasks %}
+            <tr class="{% if task.status == 'COMPLETED' %}completed
+                {% elif task.status == 'FAILED' %}failed
+                {% elif task.status == 'RUNNING' %}running
+                {% else %}pending{% endif %}">
+                <td>{{ task.job_description }}</td>
+                <td>{{ task.status }}</td>
+                <td>{{ task.start_time | date_format if task.start_time else 'N/A' }}</td>
+                <td>{{ task.end_time | date_format if task.end_time else 'N/A' }}</td>
+                <td>
+                    <a href="{{ url_for('job_status', job_id=task.job_id) }}" class="view-logs">View Logs</a>
+                </td>
+                <td>
+                    {% if task.status == 'RUNNING' %}
+                        <form id="stop-form-{{ task.job_id }}" action="/stop-job/{{ task.job_id }}" method="post" style="display:inline;">
+                            <button type="button" style="background-color: red;" onclick="confirmStop('{{ task.job_id }}')">Stop</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+</tbody>
+
     </table>
     <div class="button-group">
         <a href="/job-form">

@@ -1,5 +1,5 @@
-from flask import Flask, request, jsonify, render_template, redirect
-from data_jobs.celery_app import run_job
+from flask import Flask, request, jsonify, render_template, redirect, flash
+from data_jobs.celery_app import run_job, celery_app
 import pymongo
 from datetime import datetime
 from jobs import get_job_parameters
@@ -9,6 +9,7 @@ app = Flask(__name__)
 # MongoDB client setup
 mongo_client = pymongo.MongoClient('mongodb://localhost:27017/')
 result_db = mongo_client['celery_results']
+app.secret_key = 'your_secret_key_here'  # Needed for flash messages
 
 
 @app.template_filter('date_format')
@@ -67,6 +68,28 @@ def job_status(job_id):
         return "Job not found.", 404
     result['_id'] = str(result['_id'])
     return jsonify(result)
+
+
+@app.route('/stop-job/<job_id>', methods=['POST'])
+def stop_job(job_id):
+    """
+       Stops a running Celery job by revoking it.
+       """
+    job = result_db['job_results'].find_one({"job_id": job_id})
+    if not job:
+        return jsonify({"error": "Job not found"}), 404
+
+    celery_task_id = job.get("celery_task_id")
+    if not celery_task_id:
+        return jsonify({"error": "Task ID not available"}), 400
+
+    celery_app.control.revoke(celery_task_id, terminate=True)
+    result_db['job_results'].update_one(
+        {"job_id": job_id},
+        {"$set": {"status": "STOPPED"}}
+    )
+    flash(f"Job {job_id} stopped successfully!", "success")
+    return redirect("/")
 
 
 if __name__ == '__main__':

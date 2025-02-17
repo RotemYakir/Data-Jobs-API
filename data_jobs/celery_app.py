@@ -15,8 +15,12 @@ def run_job(job_type, job_description, params):
     try:
         job_class = job_factory(job_type)
         job = job_class(job_description, params)
-        result_db['job_results'].insert_one(job.get_job_data())
+        job_data = job.get_job_data()
+        job_data["celery_task_id"] = run_job.request.id  # Store the Celery task ID
+
+        result_db['job_results'].insert_one(job_data)
         job.run()
+
         result_db['job_results'].update_one(
             {"job_id": job.job_id},
             {"$set": job.get_job_data()}
