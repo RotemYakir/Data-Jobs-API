@@ -50,13 +50,17 @@ def submit_job():
     """
     job_type = request.form.get('job_type')
     job_description = request.form.get('job_description')
+    submission_type = request.form.get("submission_type", "sumbit&finish")
 
     # Collect all parameters dynamically
     params = {key: value for key, value in request.form.items() if key not in ['job_type', 'job_id']}
 
     try:
         task_result = run_job.delay(job_type, job_description, params)
-        return redirect("/")
+        if submission_type == 'submit&fill':
+            return redirect("/job-form")
+        else:
+            return redirect("/")
     except NameError:
         return f"Error: Job '{job_type}' not found.", 400
 

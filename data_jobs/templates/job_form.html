@@ -77,7 +77,10 @@
 
                 jobParams[selectedJob].forEach(param => {
                     const label = document.createElement("label");
-                    label.textContent = param.replace("_", " ").split(" ").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ") + ":";
+                    label.textContent = param.replace("_", " ")
+                        .split(" ")
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(" ") + ":";
 
                     const input = document.createElement("input");
                     input.type = "text";
@@ -92,29 +95,47 @@
             jobSelect.addEventListener("change", updateParams);
             updateParams(); // Call once to set the initial state
         });
+
+        function setSubmissionType(event, type) {
+            event.preventDefault();  // Stop normal form submission
+            console.log(`Setting submission type: ${type}`);
+
+            const submissionInput = document.getElementById("submission_type");
+            if (!submissionInput) {
+                console.error("Error: submission_type input not found!");
+                return;
+            }
+
+            submissionInput.value = type;
+            console.log(`Form submission type set to: ${type}`);
+
+            document.getElementById("jobForm").submit();
+        }
     </script>
 </head>
 <body>
-    <div class="container">
-        <h1>Submit a Job</h1>
-        <form action="/submit-job" method="post">
-            <label for="job_type">Select Job:</label>
-            <select id="job_type" name="job_type" required>
-                <option value="">--Select a Job--</option>
-                {% for job in job_types %}
-                    <option value="{{ job }}">{{ job.replace("_", " ").title() }}</option>
-                {% endfor %}
-            </select>
+<div class="container">
+    <h1>Submit a Job</h1>
+    <form id="jobForm" action="/submit-job" method="post">
+        <input type="hidden" id="submission_type" name="submission_type" value="sumbit&fill">
+        <label for="job_type">Select Job:</label>
+        <select id="job_type" name="job_type" required>
+            <option value="">--Select a Job--</option>
+            {% for job in job_types %}
+            <option value="{{ job }}">{{ job.replace("_", " ").title() }}</option>
+            {% endfor %}
+        </select>
 
-            <label for="job_description">Job Description:</label>
-            <input type="text" id="job_description" name="job_description" required>
+        <label for="job_description">Job Description:</label>
+        <input type="text" id="job_description" name="job_description" required>
 
-            <div id="params-container"></div> <!-- Dynamic inputs appear here -->
+        <div id="params-container"></div> <!-- Dynamic inputs appear here -->
 
-            <div class="button-group">
-                <button type="submit">Submit Job</button>
-            </div>
-        </form>
-    </div>
+        <div class="button-group">
+            <button type="button" onclick="setSubmissionType(event, 'submit&finish')">Submit & Finish</button>
+            <button type="button" onclick="setSubmissionType(event, 'submit&fill')">Submit & Fill Another</button>
+        </div>
+    </form>
+</div>
 </body>
 </html>
