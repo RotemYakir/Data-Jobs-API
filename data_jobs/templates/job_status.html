@@ -2,18 +2,155 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Job Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        .status-box {
+            font-size: 18px;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .status-pending { background-color: #f8d7da; color: #721c24; }
+        .status-running { background-color: #d1ecf1; color: #0c5460; }
+        .status-completed { background-color: #d4edda; color: #155724; }
+        .status-failed { background-color: #f8d7da; color: #721c24; }
+
+        .info {
+            font-size: 16px;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .logs-container {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 6px;
+            max-height: 500px;
+            overflow-y: auto;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .log-entry {
+            padding: 5px;
+            border-radius: 5px;
+            display: flex;
+            font-size: 14px;
+        }
+
+        .log-entry:nth-child(odd) { background-color: #F0F0F0; }
+        .log-entry:nth-child(even) { background-color: #E8E8E8; }
+
+        .log-timestamp {
+            font-weight: bold;
+            color: #007bff;
+            min-width: 140px; /* Adjust width as needed */
+            text-align: right;
+            padding-right: 10px;
+            white-space: nowrap; /* Ensures timestamp stays on one line */
+        }
+
+        .log-message {
+            flex-grow: 1;
+        }
+
+        .back-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            text-align: center;
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <script>
+        function fetchLogs(jobId) {
+            fetch(`/job-status/${jobId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("logs").textContent = data.logs.join("\n") || "No logs available yet.";
+                    document.getElementById("status-box").className = "status-box status-" + data.status.toLowerCase();
+                    document.getElementById("status-box").textContent = "Status: " + data.status;
+                })
+                .catch(error => console.error("Error fetching logs:", error));
+        }
+
+    </script>
 </head>
 <body>
 <div class="container">
     <h1>Job Status</h1>
-    <p><strong>Job ID:</strong> {{ job.job_id }}</p>
-    <p><strong>Status:</strong> {{ job.status }}</p>
-    <p><strong>Start Time:</strong> {{ job.start_time }}</p>
-    <p><strong>End Time:</strong> {{ job.end_time }}</p>
 
+    <!-- Status Box with Color -->
+    <div id="status-box" class="status-box status-{{ result.status.lower() }}">
+        Status: {{ result.status }}
+    </div>
+
+    <!-- Job Information -->
+    <p class="info"><strong>Job ID:</strong> {{ result.job_id }}</p>
+    <p class="info"><strong>Description:</strong> {{ result.job_description }}</p>
+    <p class="info"><strong>Started:</strong> {{ result.start_time | date_format if result.start_time else 'Not started'
+        }}</p>
+    <p class="info"><strong>Ended:</strong> {{ result.end_time | date_format if result.end_time else 'Still running' }}
+    </p>
+
+    <!-- Logs Section -->
     <h2>Logs</h2>
-    <pre>{{ job.logs | join('\n') }}</pre>
+    <div class="logs-container" id="logs">
+        {% if result.logs %}
+        {% for log in result.logs %}
+        {% set log_parts = log.split(']', 1) %}
+        <div class="log-entry">
+            <span class="log-timestamp">{{ log_parts[0][1:] if log_parts|length > 1 else 'Unknown Time' }}</span>
+            <span class="log-message">{{ log_parts[1] if log_parts|length > 1 else log }}</span>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p>No logs available yet.</p>
+        {% endif %}
+    </div>
+
+
+    <!-- Back to Main Page Button -->
+    <a href="/" class="back-button">Back to Jobs</a>
 </div>
 </body>
 </html>
