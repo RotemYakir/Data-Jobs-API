@@ -19,19 +19,25 @@ class Job(ABC):
         self.params = params
         self.start_time = None
         self.end_time = None
-        self.status = 'PENDING'  # Options: PENDING, RUNNING, COMPLETED, FAILED
+        self.status = 'PENDING'  # Options: PENDING, RUNNING, COMPLETED, FAILED, STOPPED
         self.logs = []
 
     def log(self, message: str):
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         log_message = f"[{timestamp}] {message}"
         self.logs.append(log_message)
+        job_results_collection.update_one(
+            {"job_id": self.job_id},
+            # {"$push": {"logs": log_message}}
+            {"$push": {"logs": log_message}}
+        )
+
         logging.info(log_message)
 
     def run(self):
         self.start_time = datetime.now()
         self.status = 'RUNNING'
-        result_db['job_results'].update_one(
+        job_results_collection.update_one(
             {"job_id": self.job_id},
             {"$set": self.get_job_data()}
         )
