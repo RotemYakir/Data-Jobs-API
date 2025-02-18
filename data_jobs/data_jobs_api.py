@@ -71,7 +71,7 @@ def job_status(job_id):
     if not result:
         return "Job not found.", 404
     result['_id'] = str(result['_id'])
-    return jsonify(result)
+    return render_template('job_status.html', result=result)
 
 
 @app.route('/stop-job/<job_id>', methods=['POST'])
@@ -90,7 +90,7 @@ def stop_job(job_id):
     celery_app.control.revoke(celery_task_id, terminate=True)
     result_db['job_results'].update_one(
         {"job_id": job_id},
-        {"$set": {"status": "STOPPED"}}
+        {"$set": {"status": "STOPPED", "end_time": datetime.now()}}
     )
     flash(f"Job {job_id} stopped successfully!", "success")
     return redirect("/")
