@@ -1,6 +1,6 @@
 from celery import Celery
-from data_jobs.jobs import job_factory
 import pymongo
+from data_jobs.jobs.job import job_factory
 
 celery_app = Celery('data_jobs',
                     broker='pyamqp://guest@localhost//',

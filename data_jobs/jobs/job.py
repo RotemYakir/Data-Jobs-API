@@ -71,62 +71,16 @@ class Job(ABC):
         }
 
 
-class MoveFramesJob(Job):
-    """ Job for moving frames between locations. """
-    PARAMS = ["folder_patterns", "frame_query", "label_query", "source", "destination", "modify"]
-
-    def execute(self):
-        folder_patterns = self.params.get('folder_patterns')
-        frame_query = self.params.get('frame_query')
-        label_query = self.params.get('label_query')
-        source = self.params.get('source')
-        destination = self.params.get('destination')
-        modify = self.params.get('modify', True)
-
-        if not folder_patterns or not destination:
-            self.log("Validation failed: 'folder_patterns' or 'destination' is missing.")
-            raise ValueError("Missing required parameters.")
-
-        self.log(
-            f"Starting: Checking frames with folder_patterns='{folder_patterns}' and frame_query='{frame_query}' label_query='{label_query}'")
-
-        frame_count = 5  # Simulated count
-        self.log(f"Found {frame_count} frames matching the criteria.")
-
-        for i in range(frame_count):
-            simulated_old_folder = f"{folder_patterns}"
-            simulated_new_folder = simulated_old_folder.replace(source, destination) if source else destination
-            self.log(f"Simulated frame {i + 1}: Moving from '{simulated_old_folder}' to '{simulated_new_folder}'")
-
-        self.log("Move operation completed successfully.")
-
-
-class DeleteFramesJob(Job):
-    """ Job for deleting frames. """
-    PARAMS = ["folder_pattern", "frame_query"]
-
-    def execute(self):
-        folder_pattern = self.params.get('folder_pattern')
-        frame_query = self.params.get('frame_query')
-
-        if not folder_pattern:
-            self.log("Validation failed: 'folder_pattern' is missing.")
-            raise ValueError("Missing required parameters.")
-
-        self.log(
-            f"Simulating deletion for frames with folder_pattern='{folder_pattern}' and frame_query='{frame_query}'")
-
-        simulated_deletion_count = 5
-        self.log(f"Found {simulated_deletion_count} frames to delete.")
-
-        for i in range(simulated_deletion_count):
-            self.log(f"Simulated deletion of frame {i + 1}: From folder '{folder_pattern}'")
-
-        self.log("Deletion operation completed successfully.")
+def get_job_parameters(job_type: str):
+    """Returns a list of parameter names required for a given job."""
+    job_class = job_factory(job_type)
+    return job_class.PARAMS
 
 
 def job_factory(job_type: str):
     """ Factory method to return the correct job class. """
+    from data_jobs.jobs.delete_frames import DeleteFramesJob
+    from data_jobs.jobs.move_frames import MoveFramesJob
     job_map = {
         "delete": DeleteFramesJob,
         "move": MoveFramesJob
@@ -135,9 +89,3 @@ def job_factory(job_type: str):
     if not job:
         raise NameError(f"Job '{job_type}' doesn't exist")
     return job
-
-
-def get_job_parameters(job_type: str):
-    """Returns a list of parameter names required for a given job."""
-    job_class = job_factory(job_type)
-    return job_class.PARAMS  # Now accessing a properly defined class variable

@@ -2,7 +2,8 @@ from flask import Flask, request, jsonify, render_template, redirect, flash
 from data_jobs.celery_app import run_job, celery_app
 import pymongo
 from datetime import datetime
-from jobs import get_job_parameters
+
+from data_jobs.jobs.job import get_job_parameters
 
 app = Flask(__name__)
 

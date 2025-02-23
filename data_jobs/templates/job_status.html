@@ -101,19 +101,7 @@
             background-color: #0056b3;
         }
     </style>
-    <script>
-        function fetchLogs(jobId) {
-            fetch(`/job-status/${jobId}`)
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById("logs").textContent = data.logs.join("\n") || "No logs available yet.";
-                    document.getElementById("status-box").className = "status-box status-" + data.status.toLowerCase();
-                    document.getElementById("status-box").textContent = "Status: " + data.status;
-                })
-                .catch(error => console.error("Error fetching logs:", error));
-        }
 
-    </script>
 </head>
 <body>
 <div class="container">
