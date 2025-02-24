@@ -147,11 +147,11 @@
                     <td>{{ task.start_time | date_format if task.start_time else 'N/A' }}</td>
                     <td>{{ task.end_time | date_format if task.end_time else 'N/A' }}</td>
                     <td>
-                        <a href="{{ url_for('job_status', job_id=task.job_id) }}" class="view-logs">View Logs</a>
+                        <a href="{{ url_for('data_jobs.job_status', job_id=task.job_id) }}" class="view-logs">View Logs</a>
                     </td>
                     <td>
                         {% if task.status == 'RUNNING' %}
-                            <form id="stop-form-{{ task.job_id }}" action="/stop-job/{{ task.job_id }}" method="post" style="display:inline;">
+                            <form id="stop-form-{{ task.job_id }}" action="{{ url_for('data_jobs.stop_job', job_id=task.job_id) }}" method="post" style="display:inline;">
                                 <button type="button" class="stop-button" onclick="confirmStop('{{ task.job_id }}')">Stop</button>
                             </form>
                         {% else %}
@@ -164,7 +164,7 @@
         </table>
     </div>
     <div class="button-group">
-        <a href="/job-form">
+        <a href="{{ url_for('data_jobs.job_form') }}">
             <button>New Job</button>
         </a>
     </div>
