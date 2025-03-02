@@ -8,7 +8,7 @@ from jobs.job import get_job_parameters
 data_jobs_bp = Blueprint('data_jobs', __name__)
 
 # MongoDB client setup
-mongo_client = pymongo.MongoClient('mongodb://localhost:27017/')
+mongo_client = pymongo.MongoClient('mongodb://mongo:27017/')
 result_db = mongo_client['celery_results']
 data_jobs_bp.secret_key = 'temp_secret_key_here'  # Needed for flash messages
 

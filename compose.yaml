@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      mongo:
+        condition: service_healthy
+    environment:
+      - FLASK_ENV=development
+
+  celery_worker:
+    environment:
+      - PYTHONPATH=/app
+    build: .
+    command: ["celery", "-A", "celery_app.celery_app", "worker", "--loglevel=info"]
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      mongo:
+        condition: service_healthy
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  mongo:
+    image: "mongo"
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+      timeout: 5s

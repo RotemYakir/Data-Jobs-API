@@ -3,10 +3,10 @@ import pymongo
 from jobs.job import job_factory
 
 celery_app = Celery('data_jobs',
-                    broker='pyamqp://guest@localhost//',
-                    backend='mongodb://localhost:27017/celery_results')
+                    broker='pyamqp://guest@rabbitmq//',
+                    backend='mongodb://mongo:27017/celery_results')
 
-mongo_client = pymongo.MongoClient('mongodb://localhost:27017/')
+mongo_client = pymongo.MongoClient('mongodb://mongo:27017/')
 result_db = mongo_client['celery_results']
 
 

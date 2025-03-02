@@ -8,7 +8,7 @@ from celery import current_task
 from bson import ObjectId
 from elasticsearch import Elasticsearch
 
-mongo_client = pymongo.MongoClient('mongodb://localhost:27017/')
+mongo_client = pymongo.MongoClient('mongodb://mongo:27017/')
 result_db = mongo_client['celery_results']
 job_results_collection = result_db['job_results']
 es = Elasticsearch("http://localhost:9200")
