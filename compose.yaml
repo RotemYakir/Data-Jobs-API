@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build: .
@@ -34,8 +32,6 @@ services:
     image: "mongo"
     ports:
       - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok"]
       interval: 10s
