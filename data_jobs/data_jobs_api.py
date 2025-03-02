@@ -97,3 +97,16 @@ def stop_job(job_id):
     return redirect("/")
 
 
+@data_jobs_bp.route('/jobs', methods=['GET'])
+def get_all_jobs():
+    """
+    API endpoint to retrieve all job records.
+    """
+    jobs = list(result_db['job_results'].find().sort('start_time', -1))
+    for job in jobs:
+        job['_id'] = str(job['_id'])  # Convert MongoDB ObjectId to string
+
+    return jsonify(jobs), 200
+
+
+
