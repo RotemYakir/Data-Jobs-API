@@ -3,7 +3,7 @@ from celery_app import run_job, celery_app
 import pymongo
 from datetime import datetime
 
-from jobs.job import get_job_parameters
+from data_jobs.jobs.job import get_job_parameters
 
 data_jobs_bp = Blueprint('data_jobs', __name__)
 
